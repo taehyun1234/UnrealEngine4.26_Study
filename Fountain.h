@@ -2,9 +2,10 @@
 
 #pragma once
 
+#include "UnrealStudy.h"
 #include "GameFramework/Actor.h"
-#include "EngineMinimal.h"
 #include "Fountain.generated.h"
+
 
 UCLASS()
 class UNREALSTUDY_API AFountain : public AActor

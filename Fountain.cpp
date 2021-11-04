@@ -53,6 +53,9 @@ void AFountain::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	ABLOG_S(Warning);
+	ABLOG(Warning, TEXT("Actor Name :%s ID : %d, Location X : %.3f"), 
+		*GetName(), _id, GetActorLocation().X);
 }
 
 // Called every frame
