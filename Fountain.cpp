@@ -7,11 +7,13 @@
 AFountain::AFountain()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	_body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BODY"));
 	_water = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WATER"));
 	_light = CreateDefaultSubobject<UPointLightComponent>(TEXT("LIGHT"));
 	_splash = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SPLASH"));
+	_movement = CreateDefaultSubobject<URotatingMovementComponent>(TEXT("MOVEMENT"));
+
 
 	RootComponent = _body;				// 액터를 대표할 루트컴포넌트를 설정한다.
 	_water->SetupAttachment(_body);		// water는 body의 자식으로 붙이도록
@@ -46,6 +48,7 @@ AFountain::AFountain()
 	}
 	//ParticleSystem'/Game/InfinityBladeGrassLands/Effects/FX_Ambient/Water/P_Water_Fountain_Splash_Base_01.P_Water_Fountain_Splash_Base_01'
 
+	_rotateSpeed = 30.0f;
 }
 
 // Called when the game starts or when spawned
@@ -62,6 +65,6 @@ void AFountain::BeginPlay()
 void AFountain::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	AddActorLocalRotation(FRotator(0.0f, _rotateSpeed * DeltaTime, 0.0f));
 }
 
