@@ -41,6 +41,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* _springArm;
 
@@ -54,4 +55,17 @@ private:
 	void LookUp(float axisValue);
 
 	void ViewChange();
+	void Attack();
+
+	virtual void PostInitializeComponents() override;
+
+	UFUNCTION()
+	void OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted);
+
+private:
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	bool _isAttacking;
+
+	UPROPERTY()
+	class UABAnimInstance* _abAnim;
 };

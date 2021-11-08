@@ -2,7 +2,7 @@
 
 
 #include "ABCharacter.h"
-
+#include "ABAnimInstance.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -41,6 +41,8 @@ AABCharacter::AABCharacter()
 	GetCharacterMovement()->JumpZVelocity = 800.f;
 
 	SetControlMode(_controlMode);
+
+	_isAttacking = false;
 }
 
 // Called when the game starts or when spawned
@@ -133,6 +135,7 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction(TEXT("ViewChange"), EInputEvent::IE_Pressed, this, &AABCharacter::ViewChange);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AABCharacter::Jump);
+	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AABCharacter::Attack);
 }
 
 void AABCharacter::UpDown(float axisValue)
@@ -203,3 +206,28 @@ void AABCharacter::ViewChange()
 	}
 }
 
+void AABCharacter::Attack()
+{
+	if (_isAttacking) return;
+
+	auto animInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	if (animInstance == nullptr)
+		return;
+	animInstance->PlayAttackMontage();
+	_isAttacking = true;
+}
+
+void AABCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	auto animInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	ABCHECK(animInstance != nullptr);
+
+	animInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+}
+
+void AABCharacter::OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted)
+{
+	ABCHECK(_isAttacking);
+	_isAttacking = false;
+}

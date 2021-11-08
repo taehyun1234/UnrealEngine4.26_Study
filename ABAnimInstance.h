@@ -26,4 +26,9 @@ private:
 		Meta = (AllowPrivateAccess = true))
 	bool _isInAir;
 
+public:
+	void PlayAttackMontage();
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* _attackMontage;
 };
