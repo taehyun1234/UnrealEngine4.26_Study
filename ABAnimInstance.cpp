@@ -41,3 +41,25 @@ void UABAnimInstance::PlayAttackMontage()
 		Montage_Play(_attackMontage,1.0f);
 	}
 }
+
+void UABAnimInstance::AnimNotify_AttackHitCheck()
+{
+	onAttackHitCheck.Broadcast();
+}
+
+void UABAnimInstance::AnimNotify_NextAttackCheck()
+{
+	onNextAttackCheck.Broadcast();
+}
+
+void UABAnimInstance::JumpToAttackMontageSection(int32 newSection)
+{
+	ABCHECK(Montage_IsPlaying(_attackMontage));
+	Montage_JumpToSection(GetAttackMontageSectionName(newSection), _attackMontage);
+}
+
+FName UABAnimInstance::GetAttackMontageSectionName(int32 section)
+{
+	ABCHECK(FMath::IsWithinInclusive<int32>(section, 1, 4), NAME_None);
+	return FName(*FString::Printf(TEXT("Attack%d"), section));
+}

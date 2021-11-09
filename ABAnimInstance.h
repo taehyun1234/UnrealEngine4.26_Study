@@ -6,6 +6,9 @@
 #include "Animation/AnimInstance.h"
 #include "ABAnimInstance.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate)
+DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate)
+
 /**
  * 
  */
@@ -31,4 +34,18 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* _attackMontage;
+
+	UFUNCTION()
+	void AnimNotify_AttackHitCheck();
+
+	UFUNCTION()
+	void AnimNotify_NextAttackCheck();
+
+	void JumpToAttackMontageSection(int32 newSection);
+
+public:
+	FOnNextAttackCheckDelegate onNextAttackCheck;
+	FOnAttackHitCheckDelegate onAttackHitCheck;
+
+	FName GetAttackMontageSectionName(int32 section);
 };

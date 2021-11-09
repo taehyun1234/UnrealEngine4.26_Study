@@ -43,6 +43,8 @@ AABCharacter::AABCharacter()
 	SetControlMode(_controlMode);
 
 	_isAttacking = false;
+	_maxCombo = 4;
+	_curCombo = 0;
 }
 
 // Called when the game starts or when spawned
@@ -208,13 +210,22 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
-	if (_isAttacking) return;
-
-	auto animInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
-	if (animInstance == nullptr)
-		return;
-	animInstance->PlayAttackMontage();
-	_isAttacking = true;
+	if (_isAttacking)
+	{
+		ABCHECK(FMath::IsWithinInclusive<int32>(_curCombo, 1, _maxCombo));
+		if (_canNextCombo)
+		{
+			_isComboinputOn = true;
+		}
+		else
+		{
+			ABCHECK(_curCombo == 0);
+			AttackStartComboState();
+			_abAnim->PlayAttackMontage();
+			_abAnim->JumpToAttackMontageSection(_curCombo);
+			_isAttacking = true;
+		}
+	}
 }
 
 void AABCharacter::PostInitializeComponents()
@@ -224,10 +235,40 @@ void AABCharacter::PostInitializeComponents()
 	ABCHECK(animInstance != nullptr);
 
 	animInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+	   
+	_abAnim->onNextAttackCheck.AddLambda([this]()->void {
+		ABLOG(Warning, TEXT("OnNextAttackCheck"));
+		_canNextCombo = false;
+
+		if (_isComboinputOn)
+		{
+			AttackStartComboState();
+			_abAnim->JumpToAttackMontageSection(_curCombo);
+		}
+		});
+
 }
 
 void AABCharacter::OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted)
 {
 	ABCHECK(_isAttacking);
+	ABCHECK(_curCombo > 0);
 	_isAttacking = false;
+	AttackEndComboState();
 }
+
+void AABCharacter::AttackStartComboState()
+{
+	_canNextCombo = true;
+	_isComboinputOn = false;
+	ABCHECK(FMath::IsWithinInclusive<int32>(_curCombo, 0, _maxCombo - 1));
+	_curCombo = FMath::Clamp<int32>(_curCombo + 1, 1, _maxCombo);
+}
+
+void AABCharacter::AttackEndComboState()
+{
+	_isComboinputOn = false;
+	_canNextCombo = false;
+	_curCombo = 0;
+}
+
