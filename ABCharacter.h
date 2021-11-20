@@ -41,6 +41,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	virtual void PostInitializeComponents() override;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* _springArm;
@@ -56,8 +57,6 @@ private:
 
 	void ViewChange();
 	void Attack();
-
-	virtual void PostInitializeComponents() override;
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted);

@@ -140,6 +140,27 @@ void AABCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &AABCharacter::Attack);
 }
 
+void AABCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	_abAnim = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	ABCHECK(_abAnim != nullptr);
+
+	_abAnim->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
+
+	_abAnim->onNextAttackCheck.AddLambda([this]() -> void
+		{
+			ABLOG(Warning, TEXT("OnNextAttackCheck"));
+			_canNextCombo = false;
+
+			if (_isComboinputOn)
+			{
+				AttackStartComboState();
+				_abAnim->JumpToAttackMontageSection(_curCombo);
+			}
+		});
+}
+
 void AABCharacter::UpDown(float axisValue)
 {
 //	AddMovementInput(GetActorForwardVector(), axisValue);
@@ -210,44 +231,33 @@ void AABCharacter::ViewChange()
 
 void AABCharacter::Attack()
 {
+	//if (_isAttacking)return;
+	//auto animInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	//if (animInstance == nullptr) return;
+	//
+	//animInstance->PlayAttackMontage();
+	//_isAttacking = true;
+	ABLOG(Warning, TEXT("Attack"));
+
 	if (_isAttacking)
 	{
+		ABLOG(Warning, TEXT("Attack1"));
 		ABCHECK(FMath::IsWithinInclusive<int32>(_curCombo, 1, _maxCombo));
 		if (_canNextCombo)
 		{
 			_isComboinputOn = true;
 		}
-		else
-		{
-			ABCHECK(_curCombo == 0);
-			AttackStartComboState();
-			_abAnim->PlayAttackMontage();
-			_abAnim->JumpToAttackMontageSection(_curCombo);
-			_isAttacking = true;
-		}
+	}
+	else
+	{
+		ABCHECK(_curCombo == 0);
+		AttackStartComboState();
+		_abAnim->PlayAttackMontage();
+		_abAnim->JumpToAttackMontageSection(_curCombo);
+		_isAttacking = true;
 	}
 }
 
-void AABCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	auto animInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
-	ABCHECK(animInstance != nullptr);
-
-	animInstance->OnMontageEnded.AddDynamic(this, &AABCharacter::OnAttackMontageEnded);
-	   
-	_abAnim->onNextAttackCheck.AddLambda([this]()->void {
-		ABLOG(Warning, TEXT("OnNextAttackCheck"));
-		_canNextCombo = false;
-
-		if (_isComboinputOn)
-		{
-			AttackStartComboState();
-			_abAnim->JumpToAttackMontageSection(_curCombo);
-		}
-		});
-
-}
 
 void AABCharacter::OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted)
 {
