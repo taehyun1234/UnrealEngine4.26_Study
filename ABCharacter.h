@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "ABWeapon.h"
 #include "UnrealStudy.h"
 #include "GameFramework/Character.h"
 #include "ABCharacter.generated.h"
@@ -88,6 +89,9 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	float _attackRadius;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	USkeletalMeshComponent* _weapon;
 
 	UPROPERTY()
 	class UABAnimInstance* _abAnim;

@@ -51,13 +51,33 @@ AABCharacter::AABCharacter()
 
 	_attackRange = 200.f;
 	_attackRadius = 50.f;
+
+	//FName weaponSocket(TEXT("hand_rSocket"));
+	//if (GetMesh()->DoesSocketExist(weaponSocket))
+	//{
+	//	_weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
+	//	static ConstructorHelpers::FObjectFinder<USkeletalMesh> sk_Weapon(
+	//		TEXT("/Game/Weapon_Pack/Skeletal_Mesh/SK_Dagger_1.SK_Dagger_1"));
+	//	if (sk_Weapon.Succeeded())
+	//	{
+	//		_weapon->SetSkeletalMesh(sk_Weapon.Object);
+	//	}
+	//	_weapon->SetupAttachment(GetMesh(), weaponSocket);
+	//}
 }
 
 // Called when the game starts or when spawned
 void AABCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	FName weaponSocket(TEXT("hand_rSocket"));
+	auto curWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector,
+		FRotator::ZeroRotator);
+
+	if (curWeapon != nullptr)
+	{
+		curWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocket);
+	}
 }
 
 void AABCharacter::SetControlMode(EControlMode controlMode)
