@@ -43,6 +43,9 @@ public:
 	
 	virtual void PostInitializeComponents() override;
 
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
+		AController* EventInstigator, AActor* DamageCauser) override;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* _springArm;
 
@@ -63,7 +66,7 @@ private:
 
 	void AttackStartComboState();
 	void AttackEndComboState();
-
+	void AttackCheck();
 private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	bool _isAttacking;
@@ -80,7 +83,12 @@ private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 	int32 _maxCombo;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	float _attackRange;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	float _attackRadius;
+
 	UPROPERTY()
 	class UABAnimInstance* _abAnim;
-
 };

@@ -29,7 +29,11 @@ private:
 		Meta = (AllowPrivateAccess = true))
 	bool _isInAir;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn,
+		Meta = (AllowPrivateAccess = true))
+	bool _isDead;
 public:
+	void SetDeadAnim() { _isDead = true; }
 	void PlayAttackMontage();
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))

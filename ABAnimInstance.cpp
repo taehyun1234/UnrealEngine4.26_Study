@@ -7,6 +7,7 @@ UABAnimInstance::UABAnimInstance()
 {
 	_currentPawnSpeed = 0.f;
 	_isInAir = false;
+	_isDead = false;
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> attackMontage(
 		TEXT("/Game/Book/Animations/WarriorAttack.WarriorAttack"));
 
@@ -14,7 +15,6 @@ UABAnimInstance::UABAnimInstance()
 	{
 		_attackMontage = attackMontage.Object;
 	}
-
 }
 
 void UABAnimInstance::NativeUpdateAnimation(float deltaSeconds)
@@ -22,7 +22,10 @@ void UABAnimInstance::NativeUpdateAnimation(float deltaSeconds)
 	Super::NativeUpdateAnimation(deltaSeconds);
 
 	auto pawn = TryGetPawnOwner();
-	if (::IsValid(pawn))
+
+	if (!::IsValid(pawn)) return;
+
+	if (!_isDead)
 	{
 		_currentPawnSpeed = pawn->GetVelocity().Size();
 
@@ -36,6 +39,7 @@ void UABAnimInstance::NativeUpdateAnimation(float deltaSeconds)
 
 void UABAnimInstance::PlayAttackMontage()
 {
+	ABCHECK(!_isDead);
 	if (!Montage_IsPlaying(_attackMontage))
 	{
 		Montage_Play(_attackMontage,1.0f);
@@ -54,6 +58,7 @@ void UABAnimInstance::AnimNotify_NextAttackCheck()
 
 void UABAnimInstance::JumpToAttackMontageSection(int32 newSection)
 {
+	ABCHECK(!_isDead);
 	ABCHECK(Montage_IsPlaying(_attackMontage));
 	Montage_JumpToSection(GetAttackMontageSectionName(newSection), _attackMontage);
 }

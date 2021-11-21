@@ -3,6 +3,7 @@
 
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
+#include "DrawDebugHelpers.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -45,6 +46,11 @@ AABCharacter::AABCharacter()
 	_isAttacking = false;
 	_maxCombo = 4;
 	_curCombo = 0;
+
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCharacter"));
+
+	_attackRange = 200.f;
+	_attackRadius = 50.f;
 }
 
 // Called when the game starts or when spawned
@@ -159,6 +165,21 @@ void AABCharacter::PostInitializeComponents()
 				_abAnim->JumpToAttackMontageSection(_curCombo);
 			}
 		});
+	_abAnim->onAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck);
+}
+
+float AABCharacter::TakeDamage(float damageAmount, FDamageEvent const& damageEvent, AController* eventInvestigator, AActor* damageCauser)
+{
+	float finalDamage = Super::TakeDamage(damageAmount, damageEvent, eventInvestigator, damageCauser);
+	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), finalDamage);
+
+	if (finalDamage > 0.f)
+	{
+		_abAnim->SetDeadAnim();
+		SetActorEnableCollision(false);
+	}
+
+	return finalDamage;
 }
 
 void AABCharacter::UpDown(float axisValue)
@@ -280,5 +301,50 @@ void AABCharacter::AttackEndComboState()
 	_isComboinputOn = false;
 	_canNextCombo = false;
 	_curCombo = 0;
+}
+
+void AABCharacter::AttackCheck()
+{
+	FHitResult hitResult;
+	FCollisionQueryParams params(NAME_None, false, this);
+	bool bResult = GetWorld()->SweepSingleByChannel(
+		hitResult,
+		GetActorLocation(),
+		GetActorLocation() + GetActorForwardVector() * 200.f,
+		FQuat::Identity,
+		ECollisionChannel::ECC_GameTraceChannel2,
+		FCollisionShape::MakeSphere(50.f),
+		params
+	);
+	
+#if ENABLE_DRAW_DEBUG
+	FVector traceVec = GetActorForwardVector() * _attackRange;
+	FVector center = GetActorLocation() + traceVec * 0.5f;
+	float halfHeight = _attackRange * 0.5f + _attackRadius;
+	FQuat capsuleRot = FRotationMatrix::MakeFromZ(traceVec).ToQuat();
+	FColor drawColor = bResult ? FColor::Green : FColor::Red;
+	float debugLifeTime = 5.f;
+
+	DrawDebugCapsule(GetWorld(),
+		center,
+		halfHeight,
+		_attackRadius,
+		capsuleRot,
+		drawColor,
+		false,
+		debugLifeTime);
+#endif
+	if (bResult)
+	{
+		if (hitResult.Actor.IsValid())
+		{
+			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *hitResult.Actor->GetName());
+
+			FDamageEvent damageEvent;
+			hitResult.Actor->TakeDamage(50.0f, damageEvent, GetController(), this);
+			// TakeDamage 함수는 감지된 액터에게 데미지를 인가한다.
+		}
+	}
+
 }
 
