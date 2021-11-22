@@ -13,7 +13,7 @@ AABWeapon::AABWeapon()
 	RootComponent = _weapon;
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> weapon(
-		TEXT("/Game/Weapon_Pack/Skeletal_Mesh/SK_Dagger_1.SK_Dagger_1"));
+		TEXT("/Game/Weapon_Pack/Skeletal_Mesh/SK_Sword.SK_Sword"));
 
 	if (weapon.Succeeded())
 	{

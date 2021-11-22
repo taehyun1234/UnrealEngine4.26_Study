@@ -95,4 +95,11 @@ private:
 
 	UPROPERTY()
 	class UABAnimInstance* _abAnim;
+
+public:
+	bool CanSetWeapon();
+	void SetWeapon(class AABWeapon* newWeapon);
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class AABWeapon* _currentWeapon;
 };

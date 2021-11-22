@@ -368,3 +368,21 @@ void AABCharacter::AttackCheck()
 
 }
 
+bool AABCharacter::CanSetWeapon()
+{
+	return (_currentWeapon == nullptr);
+}
+
+void AABCharacter::SetWeapon(AABWeapon* newWeapon)
+{
+	ABCHECK(newWeapon != nullptr && _currentWeapon == nullptr);
+	FName weaponSocket(TEXT("hand_rSocket"));
+	if (newWeapon != nullptr)
+	{
+		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			weaponSocket);				// SnapToTargetNotIncludingScale는 확대/축소를 반영하지 않고 붙일 때 사용
+		newWeapon->SetOwner(this);
+		_currentWeapon = newWeapon;
+	}
+}
+
