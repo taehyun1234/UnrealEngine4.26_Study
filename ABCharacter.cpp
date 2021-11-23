@@ -4,6 +4,7 @@
 #include "ABCharacter.h"
 #include "ABAnimInstance.h"
 #include "DrawDebugHelpers.h"
+#include "ABCharacterStatComponent.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -64,6 +65,8 @@ AABCharacter::AABCharacter()
 	//	}
 	//	_weapon->SetupAttachment(GetMesh(), weaponSocket);
 	//}
+
+	_characterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 }
 
 // Called when the game starts or when spawned
@@ -186,6 +189,14 @@ void AABCharacter::PostInitializeComponents()
 			}
 		});
 	_abAnim->onAttackHitCheck.AddUObject(this, &AABCharacter::AttackCheck);
+
+	_characterStat->onHpisZero.AddLambda([this]()->void
+		{
+			ABLOG(Warning, TEXT("OnHPIsZero"));
+			_abAnim->SetDeadAnim();
+			SetActorEnableCollision(false);
+		});
+
 }
 
 float AABCharacter::TakeDamage(float damageAmount, FDamageEvent const& damageEvent, AController* eventInvestigator, AActor* damageCauser)
@@ -193,11 +204,13 @@ float AABCharacter::TakeDamage(float damageAmount, FDamageEvent const& damageEve
 	float finalDamage = Super::TakeDamage(damageAmount, damageEvent, eventInvestigator, damageCauser);
 	ABLOG(Warning, TEXT("Actor : %s took Damage : %f"), *GetName(), finalDamage);
 
-	if (finalDamage > 0.f)
-	{
-		_abAnim->SetDeadAnim();
-		SetActorEnableCollision(false);
-	}
+	//if (finalDamage > 0.f)
+	//{
+	//	_abAnim->SetDeadAnim();
+	//	SetActorEnableCollision(false);
+	//}
+
+	_characterStat->SetDamage(finalDamage);
 
 	return finalDamage;
 }
@@ -361,7 +374,7 @@ void AABCharacter::AttackCheck()
 			ABLOG(Warning, TEXT("Hit Actor Name : %s"), *hitResult.Actor->GetName());
 
 			FDamageEvent damageEvent;
-			hitResult.Actor->TakeDamage(50.0f, damageEvent, GetController(), this);
+			hitResult.Actor->TakeDamage(_characterStat->GetAttack(), damageEvent, GetController(), this);
 			// TakeDamage 함수는 감지된 액터에게 데미지를 인가한다.
 		}
 	}
