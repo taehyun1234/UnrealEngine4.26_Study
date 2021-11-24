@@ -36,6 +36,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Effect)
 	UParticleSystemComponent* _effect;
 
+	UPROPERTY(VisibleAnywhere, Category = UI)
+	class UWidgetComponent* _hpBarWidget;
+
 private:
 	UFUNCTION()
 		void OnCharacterOverlap(UPrimitiveComponent* overlappedComp, AActor* otherActor,

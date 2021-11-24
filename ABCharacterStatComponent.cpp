@@ -41,7 +41,7 @@ void UABCharacterStatComponent::SetNewLevel(int32 newLevel)
 	if (_currentStatData != nullptr)
 	{
 		_level = newLevel;
-		_currentHp = _currentStatData->MaxHP;
+		SetHP(_currentStatData->MaxHP);
 	}
 	else
 	{
@@ -52,9 +52,17 @@ void UABCharacterStatComponent::SetNewLevel(int32 newLevel)
 void UABCharacterStatComponent::SetDamage(float newDamage)
 {
 	ABCHECK(_currentStatData != nullptr);
-	_currentHp = FMath::Clamp<float>(_currentHp - newDamage, 0.f, _currentStatData->MaxHP);
+//	_currentHp = FMath::Clamp<float>(_currentHp - newDamage, 0.f, _currentStatData->MaxHP);
+	SetHP(FMath::Clamp<float>(_currentHp - newDamage, 0.f, _currentStatData->MaxHP));
+}
+
+void UABCharacterStatComponent::SetHP(float newHP)
+{
+	_currentHp = newHP;
+	onHpChanged.Broadcast();
 	if (_currentHp <= 0.f)
 	{
+		_currentHp = 0.f;
 		onHpisZero.Broadcast();
 	}
 }
@@ -63,6 +71,13 @@ float UABCharacterStatComponent::GetAttack()
 {
 	ABCHECK(_currentStatData != nullptr, 0.f);
 	return _currentStatData->Attack;
+}
+
+float UABCharacterStatComponent::GetHPRatio()
+{
+	ABCHECK(_currentStatData != nullptr, 0.f);
+
+	return (_currentStatData->MaxHP < KINDA_SMALL_NUMBER ? 0.f : (_currentHp / _currentStatData->MaxHP));
 }
 
 

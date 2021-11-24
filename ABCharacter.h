@@ -106,4 +106,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Stat)
 	class UABCharacterStatComponent* _characterStat;
 
+	UPROPERTY(VisibleAnywhere, Category = UI)
+	class UWidgetComponent* _hpBarWidget;
 };

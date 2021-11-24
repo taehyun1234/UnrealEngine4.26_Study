@@ -5,6 +5,7 @@
 #include "ABAnimInstance.h"
 #include "DrawDebugHelpers.h"
 #include "ABCharacterStatComponent.h"
+#include "Components/WidgetComponent.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -67,6 +68,19 @@ AABCharacter::AABCharacter()
 	//}
 
 	_characterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));
+
+	_hpBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBARWIDGET"));
+	_hpBarWidget->SetupAttachment(GetMesh());
+
+	_hpBarWidget->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));	// HP UI는 머리 위 180 쪽에 놓을것
+	_hpBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	static ConstructorHelpers::FClassFinder<UUserWidget> uiHud(TEXT("/Game/Book/UI/UI_HPBar.UI_HPBar_C"));
+
+	if (uiHud.Succeeded())
+	{
+		_hpBarWidget->SetWidgetClass(uiHud.Class);
+		_hpBarWidget->SetDrawSize(FVector2D(150.f, 50.f));
+	}
 }
 
 // Called when the game starts or when spawned
@@ -345,7 +359,7 @@ void AABCharacter::AttackCheck()
 		GetActorLocation(),
 		GetActorLocation() + GetActorForwardVector() * 200.f,
 		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel2,
+		ECollisionChannel::ECC_GameTraceChannel1,			// 이 채널은 config폴더 안에 있는 DefaultEngine.ini 파일 내부를 보면 알 수 있음.
 		FCollisionShape::MakeSphere(50.f),
 		params
 	);

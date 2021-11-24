@@ -7,6 +7,7 @@
 #include "ABCharacterStatComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnHPIsZeroDelegate);
+DECLARE_MULTICAST_DELEGATE(FOnHPChangedDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UNREALSTUDY_API UABCharacterStatComponent : public UActorComponent
@@ -25,10 +26,12 @@ protected:
 public:
 	void SetNewLevel(int32 newLevel);
 	void SetDamage(float newDamage);
+	void SetHP(float newHP);
 	float GetAttack();
+	float GetHPRatio();
 
 	FOnHPIsZeroDelegate onHpisZero;
-
+	FOnHPChangedDelegate onHpChanged;
 private:
 	struct FABCharacterData* _currentStatData = nullptr;
 
