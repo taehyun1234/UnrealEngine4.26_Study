@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "ABCharacterStatComponent.h"
 #include "Components/WidgetComponent.h"
+#include "ABCharacterWidget.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -95,6 +96,15 @@ void AABCharacter::BeginPlay()
 	{
 		curWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocket);
 	}
+
+	// 4.21버전부터 위젯 초기화 시점이 BeginPlay로 바뀌면서, Postinitialize에서 초기화할경우 오류가 남.
+	auto characterWidget = Cast<UABCharacterWidget>(_hpBarWidget->GetUserWidgetObject());
+
+	if (characterWidget != nullptr)
+	{
+		characterWidget->BindCharacterStat(_characterStat);
+	}
+
 }
 
 void AABCharacter::SetControlMode(EControlMode controlMode)
