@@ -82,6 +82,9 @@ AABCharacter::AABCharacter()
 		_hpBarWidget->SetWidgetClass(uiHud.Class);
 		_hpBarWidget->SetDrawSize(FVector2D(150.f, 50.f));
 	}
+
+	AIControllerClass = AABAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 // Called when the game starts or when spawned
@@ -139,8 +142,23 @@ void AABCharacter::SetControlMode(EControlMode controlMode)
 		_springArm->bDoCollisionTest = false;
 		bUseControllerRotationYaw = false;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
+		// bOrientRotationToMovement가 true일 경우, RotationRate를 회전 변경속도로 사용하여
+		// 캐릭터를 가속방향으로 회전한다.
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		// DesiredRotation이 true일 경우, RotationRate를 
+		// 회전 속도로 사용하여 컨트롤러의 원하는 회전 방향으로 캐릭터를 부드럽게 회전
 		GetCharacterMovement()->RotationRate = FRotator(0.f, 720.f, 0.f);
+		break;
+	case EControlMode::NPC:
+		bUseControllerRotationYaw = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		// DesiredRotation이 true일 경우, RotationRate를 
+		// 회전 속도로 사용하여 컨트롤러의 원하는 회전 방향으로 캐릭터를 부드럽게 회전
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		// bOrientRotationToMovement가 true일 경우, RotationRate를 회전 변경속도로 사용하여
+		// 캐릭터를 가속방향으로 회전한다.
+		GetCharacterMovement()->RotationRate = FRotator(0.f, 480.f, 0.f);
+		// 회전속도를 480으로 놓는다. Y값이 회전 속도임.
 		break;
 	}
 }
@@ -237,6 +255,23 @@ float AABCharacter::TakeDamage(float damageAmount, FDamageEvent const& damageEve
 	_characterStat->SetDamage(finalDamage);
 
 	return finalDamage;
+}
+
+void AABCharacter::PossessedBy(AController* newController)
+{
+	Super::PossessedBy(newController);
+
+	// Player가 아닌 NPC의 경우 최대속도를 300으로 바꾼다.
+	if (IsPlayerControlled())
+	{
+		SetControlMode(EControlMode::DIABLO);
+		GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	}
+	else
+	{
+		SetControlMode(EControlMode::NPC);
+		GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	}
 }
 
 void AABCharacter::UpDown(float axisValue)

@@ -5,6 +5,7 @@
 #include "ABWeapon.h"
 #include "UnrealStudy.h"
 #include "GameFramework/Character.h"
+#include "ABAIController.h"
 #include "ABCharacter.generated.h"
 
 UCLASS()
@@ -21,7 +22,8 @@ protected:
 	enum class EControlMode
 	{
 		GTA = 0,
-		DIABLO
+		DIABLO,
+		NPC
 	};
 	virtual void BeginPlay() override;
 
@@ -46,6 +48,8 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, 
 		AController* EventInstigator, AActor* DamageCauser) override;
+
+	virtual void PossessedBy(AController* newController) override;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* _springArm;
