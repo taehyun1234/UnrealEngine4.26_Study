@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "ABWeapon.h"
 #include "UnrealStudy.h"
 #include "GameFramework/Character.h"
-#include "ABAIController.h"
 #include "ABCharacter.generated.h"
+
+DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 
 UCLASS()
 class UNREALSTUDY_API AABCharacter : public ACharacter
@@ -57,6 +57,8 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* _camera;
 
+	void Attack();
+	FOnAttackEndDelegate OnAttackEnd;
 private:
 	void UpDown(float axisValue);
 	void LeftRight(float axisValue);
@@ -64,7 +66,6 @@ private:
 	void LookUp(float axisValue);
 
 	void ViewChange();
-	void Attack();
 
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted);

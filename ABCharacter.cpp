@@ -7,6 +7,8 @@
 #include "ABCharacterStatComponent.h"
 #include "Components/WidgetComponent.h"
 #include "ABCharacterWidget.h"
+#include "ABAIController.h"
+#include "ABWeapon.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -378,6 +380,7 @@ void AABCharacter::OnAttackMontageEnded(UAnimMontage* montage, bool bInterrupted
 	ABCHECK(_curCombo > 0);
 	_isAttacking = false;
 	AttackEndComboState();
+	OnAttackEnd.Broadcast();
 }
 
 void AABCharacter::AttackStartComboState()

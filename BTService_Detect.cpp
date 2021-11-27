@@ -17,41 +17,42 @@ UBTService_Detect::UBTService_Detect()
 void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
+	if (nullptr == ControllingPawn) return;
 
-	auto controllingPawn = OwnerComp.GetAIOwner()->GetPawn();
-	if (controllingPawn == nullptr)
-		return;
+	UWorld* World = ControllingPawn->GetWorld();
+	if (nullptr == World) return;
 
-	UWorld* world = controllingPawn->GetWorld();
-	FVector center = controllingPawn->GetActorLocation();
-	float detectRad = 600.f;
+	FVector Center = ControllingPawn->GetActorLocation();
+	float DetectRadius = 600.0f;
 
-	// world가 없을 경우 리턴한다. -> 캐릭터의 월드좌표가 없다는건 말이안댐
-	if (world == nullptr) return;
-
-	TArray<FOverlapResult> overlapResults;
-	FCollisionQueryParams collisionQueryParam(NAME_None, false, controllingPawn);
-	bool bResult = world->OverlapMultiByChannel(
-		overlapResults,
-		center,
+	// 600의 반지름을 가진 구체를 만들어서 오브젝트를 감지한다.
+	TArray<FOverlapResult> OverlapResults;
+	FCollisionQueryParams CollisionQueryParam(NAME_None, false, ControllingPawn);
+	bool bResult = World->OverlapMultiByChannel(
+		OverlapResults,
+		Center,
 		FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel1,
-		FCollisionShape::MakeSphere(detectRad),
-		collisionQueryParam
+		FCollisionShape::MakeSphere(DetectRadius),
+		CollisionQueryParam
 	);
 
+	// 오브젝트가 감지가 되면, 그 오브젝트가 Character인지 검사한다.
 	if (bResult)
 	{
-		for (auto overlapResult : overlapResults)
+		for (FOverlapResult OverlapResult : OverlapResults)
 		{
-			AABCharacter* abCharacter = Cast<AABCharacter>(overlapResult.GetActor());
-			if (abCharacter && abCharacter->GetController()->IsPlayerController())
+			AABCharacter* ABCharacter = Cast<AABCharacter>(OverlapResult.GetActor());
+			if (ABCharacter && ABCharacter->GetController()->IsPlayerController())
 			{
-				OwnerComp.GetBlackboardComponent()->SetValueAsObject(AABAIController::_targetkey, abCharacter);
-				DrawDebugSphere(world, center, detectRad, 16, FColor::Green, false, 0.2f);
+				// Character면, 블랙보드에 저장한다.
+				OwnerComp.GetBlackboardComponent()->SetValueAsObject(AABAIController::_targetkey, ABCharacter);
 
-				DrawDebugPoint(world, abCharacter->GetActorLocation(), 10.f, FColor::Blue, false, 0.2f);
-				DrawDebugLine(world, controllingPawn->GetActorLocation(),abCharacter->GetActorLocation(), FColor::Blue, false, 0.27f);
+				// 디버깅 용.
+				DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Green, false, 0.2f);
+				DrawDebugPoint(World, ABCharacter->GetActorLocation(), 10.0f, FColor::Blue, false, 0.2f);
+				DrawDebugLine(World, ControllingPawn->GetActorLocation(), ABCharacter->GetActorLocation(), FColor::Blue, false, 0.2f);
 				return;
 			}
 		}
@@ -60,5 +61,6 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(AABAIController::_targetkey, nullptr);
 	}
-	DrawDebugSphere(world, center, detectRad, 16, FColor::Red, false, 0.2f);
+
+	DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Red, false, 0.2f);
 }

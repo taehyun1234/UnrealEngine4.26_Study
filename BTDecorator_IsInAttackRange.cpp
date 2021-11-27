@@ -23,7 +23,7 @@ bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeCompo
 	if (target == nullptr)
 		return false;
 
-	bResult = (target->GetDistanceTo(controllingPawn) < 200.f);
-
+	bResult = (target->GetDistanceTo(controllingPawn) <= 200.f);
+	
 	return bResult;
 }
