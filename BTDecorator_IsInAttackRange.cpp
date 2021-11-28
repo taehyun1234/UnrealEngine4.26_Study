@@ -11,19 +11,14 @@ UBTDecorator_IsInAttackRange::UBTDecorator_IsInAttackRange()
 	NodeName = TEXT("CanAttack");
 }
 
-bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* nodeMemory) const
+bool UBTDecorator_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
-	bool bResult = Super::CalculateRawConditionValue(OwnerComp, nodeMemory);
+	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
+	if (nullptr == ControllingPawn) return false;
 
-	auto controllingPawn = OwnerComp.GetAIOwner()->GetPawn();
-	if (controllingPawn == nullptr) return false;
+	AABCharacter* Target = Cast<AABCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AABAIController::_targetkey));
+	if (nullptr == Target) return false;
 
-	auto target = Cast<AABCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AABAIController::_targetkey));
-
-	if (target == nullptr)
-		return false;
-
-	bResult = (target->GetDistanceTo(controllingPawn) <= 200.f);
-	
+	bool bResult = (Target->GetDistanceTo(ControllingPawn) <= 200.0f);
 	return bResult;
 }

@@ -2,10 +2,10 @@
 
 
 #include "ABAIController.h"
-#include "NavigationSystem.h"
+//#include "NavigationSystem.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
-#include "BehaviorTree/BlackboardComponent.h"
 
 const FName AABAIController::_homePosKey(TEXT("HomePos"));
 const FName AABAIController::_patrolPosKey(TEXT("PatrolPos"));
@@ -30,10 +30,12 @@ AABAIController::AABAIController()
 
 }
 
+// 빙의하는 시점에 불리는 함수.
 void AABAIController::OnPossess(APawn* inPawn)
-{ 
+{  
 	Super::OnPossess(inPawn);
 	if (UseBlackboard(_bbAsset, Blackboard))
+		// AIController의 블랙보드를 입력 받은 _bbAsset으로 설정하는 과정.
 	{
 		Blackboard->SetValueAsVector(_homePosKey, inPawn->GetActorLocation());
 		if (!RunBehaviorTree(_btAsset))
@@ -43,6 +45,7 @@ void AABAIController::OnPossess(APawn* inPawn)
 	}
 }
 
+// 빙의 해제되는 시점에 불리는 함수.
 void AABAIController::OnUnPossess()
 {
 	Super::OnUnPossess();

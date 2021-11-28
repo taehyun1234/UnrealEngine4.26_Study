@@ -85,6 +85,7 @@ AABCharacter::AABCharacter()
 		_hpBarWidget->SetDrawSize(FVector2D(150.f, 50.f));
 	}
 
+	// Pawn에 기본적으로 존재하는 AIController의 클래스와 AutoPossessAI를  초기화한다.
 	AIControllerClass = AABAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
@@ -356,7 +357,6 @@ void AABCharacter::Attack()
 
 	if (_isAttacking)
 	{
-		ABLOG(Warning, TEXT("Attack1"));
 		ABCHECK(FMath::IsWithinInclusive<int32>(_curCombo, 1, _maxCombo));
 		if (_canNextCombo)
 		{
