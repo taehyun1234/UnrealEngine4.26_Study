@@ -113,4 +113,11 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = UI)
 	class UWidgetComponent* _hpBarWidget;
+
+private:
+	void OnAssetLoadCompleted();
+
+private:
+	FSoftObjectPath _characterAssetToLoad = FSoftObjectPath(nullptr);
+	TSharedPtr<struct FStreamableHandle> _assetStreamingHandle;
 };

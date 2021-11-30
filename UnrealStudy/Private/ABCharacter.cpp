@@ -9,6 +9,7 @@
 #include "ABCharacterWidget.h"
 #include "ABAIController.h"
 #include "ABWeapon.h"
+#include "ABCharacterSetting.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -57,18 +58,18 @@ AABCharacter::AABCharacter()
 	_attackRange = 200.f;
 	_attackRadius = 50.f;
 
-	//FName weaponSocket(TEXT("hand_rSocket"));
-	//if (GetMesh()->DoesSocketExist(weaponSocket))
-	//{
-	//	_weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
-	//	static ConstructorHelpers::FObjectFinder<USkeletalMesh> sk_Weapon(
-	//		TEXT("/Game/Weapon_Pack/Skeletal_Mesh/SK_Dagger_1.SK_Dagger_1"));
-	//	if (sk_Weapon.Succeeded())
-	//	{
-	//		_weapon->SetSkeletalMesh(sk_Weapon.Object);
-	//	}
-	//	_weapon->SetupAttachment(GetMesh(), weaponSocket);
-	//}
+	FName weaponSocket(TEXT("hand_rSocket"));
+	if (GetMesh()->DoesSocketExist(weaponSocket))
+	{
+		_weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WEAPON"));
+		static ConstructorHelpers::FObjectFinder<USkeletalMesh> sk_Weapon(
+			TEXT("/Game/Weapon_Pack/Skeletal_Mesh/SK_Dagger_1.SK_Dagger_1"));
+		if (sk_Weapon.Succeeded())
+		{
+			_weapon->SetSkeletalMesh(sk_Weapon.Object);
+		}
+		_weapon->SetupAttachment(GetMesh(), weaponSocket);
+	}
 
 	_characterStat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("CHARACTERSTAT"));
 
@@ -88,6 +89,16 @@ AABCharacter::AABCharacter()
 	// Pawn에 기본적으로 존재하는 AIController의 클래스와 AutoPossessAI를  초기화한다.
 	AIControllerClass = AABAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	//auto defaultSetting = GetDefault<UABCharacterSetting>();
+	//if(defaultSetting->CharacterAssets.Num() > 0)
+	//{
+	//	for (auto characterAsset : defaultSetting->CharacterAssets)
+	//	{
+	//		ABLOG(Warning, TEXT("Character Asset : %s"), *characterAsset.ToString());
+	//	}
+	//}
+	// ini파일에서 잘 가져오는지 확인
 }
 
 // Called when the game starts or when spawned
@@ -98,10 +109,10 @@ void AABCharacter::BeginPlay()
 	auto curWeapon = GetWorld()->SpawnActor<AABWeapon>(FVector::ZeroVector,
 		FRotator::ZeroRotator);
 
-	if (curWeapon != nullptr)
-	{
-		curWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocket);
-	}
+	//if (curWeapon != nullptr)
+	//{
+	//	curWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, weaponSocket);
+	//}
 
 	// 4.21버전부터 위젯 초기화 시점이 BeginPlay로 바뀌면서, Postinitialize에서 초기화할경우 오류가 남.
 	auto characterWidget = Cast<UABCharacterWidget>(_hpBarWidget->GetUserWidgetObject());
@@ -111,6 +122,18 @@ void AABCharacter::BeginPlay()
 		characterWidget->BindCharacterStat(_characterStat);
 	}
 
+	//if (!IsPlayerControlled())
+	//{
+	//	auto defaultSetting = GetDefault<UABCharacterSetting>();
+	//	int32 randIndex = FMath::RandRange(0, defaultSetting->CharacterAssets.Num() - 1);
+	//	_characterAssetToLoad = defaultSetting->CharacterAssets[randIndex];
+	//
+	//	auto abGameInstance = Cast<UABGameInstance>(GetGameInstance());
+	//	if (abGameInstance != nullptr)
+	//	{
+	//		_assetStreamingHandle = abGameInstance->_streamableManager.RequestAsyncLoad(_characterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+	//	}
+	//}
 }
 
 void AABCharacter::SetControlMode(EControlMode controlMode)
@@ -459,5 +482,16 @@ void AABCharacter::SetWeapon(AABWeapon* newWeapon)
 		newWeapon->SetOwner(this);
 		_currentWeapon = newWeapon;
 	}
+}
+
+void AABCharacter::OnAssetLoadCompleted()
+{
+	//USkeletalMesh* assetLoaded = Cast<USkeletalMesh>(_assetStreamingHandle->GetLoadedAsset());
+	//
+	//_assetStreamingHandle.Reset();
+	//if (assetLoaded != nullptr)
+	//{
+	//	GetMesh()->SetSkeletalMesh(assetLoaded);
+	//}
 }
 
