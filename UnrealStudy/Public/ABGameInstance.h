@@ -49,7 +49,6 @@ public:
 	FABCharacterData* GetABCharacterData(int32 level);
 
 	FStreamableManager _streamableManager;
-
 private:
 	UPROPERTY()
 	class UDataTable* _abCharacterTable;

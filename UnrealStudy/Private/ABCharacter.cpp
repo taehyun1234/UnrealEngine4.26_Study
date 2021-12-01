@@ -10,6 +10,7 @@
 #include "ABAIController.h"
 #include "ABWeapon.h"
 #include "ABCharacterSetting.h"
+#include "ABGameInstance.h"
 // Sets default values
 AABCharacter::AABCharacter()
 {
@@ -90,14 +91,14 @@ AABCharacter::AABCharacter()
 	AIControllerClass = AABAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	//auto defaultSetting = GetDefault<UABCharacterSetting>();
-	//if(defaultSetting->CharacterAssets.Num() > 0)
-	//{
-	//	for (auto characterAsset : defaultSetting->CharacterAssets)
-	//	{
-	//		ABLOG(Warning, TEXT("Character Asset : %s"), *characterAsset.ToString());
-	//	}
-	//}
+	auto defaultSetting = GetDefault<UABCharacterSetting>();
+	if(defaultSetting->CharacterAssets.Num() > 0)
+	{
+		for (auto characterAsset : defaultSetting->CharacterAssets)
+		{
+			ABLOG(Warning, TEXT("Character Asset : %s"), *characterAsset.ToString());
+		}
+	}
 	// ini파일에서 잘 가져오는지 확인
 }
 
@@ -122,18 +123,19 @@ void AABCharacter::BeginPlay()
 		characterWidget->BindCharacterStat(_characterStat);
 	}
 
-	//if (!IsPlayerControlled())
-	//{
-	//	auto defaultSetting = GetDefault<UABCharacterSetting>();
-	//	int32 randIndex = FMath::RandRange(0, defaultSetting->CharacterAssets.Num() - 1);
-	//	_characterAssetToLoad = defaultSetting->CharacterAssets[randIndex];
-	//
-	//	auto abGameInstance = Cast<UABGameInstance>(GetGameInstance());
-	//	if (abGameInstance != nullptr)
-	//	{
-	//		_assetStreamingHandle = abGameInstance->_streamableManager.RequestAsyncLoad(_characterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
-	//	}
-	//}
+	if (!IsPlayerControlled())
+	{
+		auto defaultSetting = GetDefault<UABCharacterSetting>();
+		int32 randIndex = FMath::RandRange(0, defaultSetting->CharacterAssets.Num() - 1);
+		_characterAssetToLoad = defaultSetting->CharacterAssets[randIndex];
+	
+		auto abGameInstance = Cast<UABGameInstance>(GetGameInstance());
+		if (abGameInstance != nullptr)
+		{
+			_assetStreamingHandle = abGameInstance->_streamableManager.RequestAsyncLoad(_characterAssetToLoad, FStreamableDelegate::CreateUObject(this, &AABCharacter::OnAssetLoadCompleted));
+			ABLOG(Warning, TEXT("num : %d"), randIndex);
+		}
+	}
 }
 
 void AABCharacter::SetControlMode(EControlMode controlMode)
@@ -486,12 +488,13 @@ void AABCharacter::SetWeapon(AABWeapon* newWeapon)
 
 void AABCharacter::OnAssetLoadCompleted()
 {
-	//USkeletalMesh* assetLoaded = Cast<USkeletalMesh>(_assetStreamingHandle->GetLoadedAsset());
-	//
-	//_assetStreamingHandle.Reset();
-	//if (assetLoaded != nullptr)
-	//{
-	//	GetMesh()->SetSkeletalMesh(assetLoaded);
-	//}
+	USkeletalMesh* assetLoaded = Cast<USkeletalMesh>(
+		_assetStreamingHandle->GetLoadedAsset());
+	
+	_assetStreamingHandle.Reset();
+	if (assetLoaded != nullptr)
+	{
+		GetMesh()->SetSkeletalMesh(assetLoaded);
+	}
 }
 
